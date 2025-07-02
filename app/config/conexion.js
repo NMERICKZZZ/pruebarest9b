@@ -1,15 +1,17 @@
-const mongoose = require('mongoose')
-const config = require('./configuracion')
+const mongoose = require('mongoose');
+const config = require('./configuracion');
 
-module.exports = {
-    connection: null,
-    connect: function() {
-        if(this.connection) return this.connection
-        return mongoose.connect(config.DB)
-        .then(connection => {
-            this.connection = connection
-            console.log('la conexion se realizo de manera correcta')
+module.exports =  {
+    connecction : null,
+    connect : () => {
+        if(this.connecction) return this.connecction
+        return mongoose.connect(config.DB,)
+        .then(conn =>{
+            this.connecction = conn
+            console.log('La conexión a la base de datos se ha realizado correctamente');
+    
         })
-        .catch(e => {console.log('error en la conexion ' ,e)})
-    }
+        .catch(e =>{console.log('Error al conectar a la base de datos', e);})
+}
+
 }
