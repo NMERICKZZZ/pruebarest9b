@@ -1,21 +1,120 @@
-const ejercicioModel = require('../models/EjerciciosModel');
+const ejercicioModel = require('../models/EjerciciosModel')
 
-function buscarTodo(req, res) {
+function buscarTodo(req,res){
     ejercicioModel.find({})
-        .then(ejercicios => {
-            if (ejercicios.lenghth) {
-                return res.status(200).send({ejercicios})
-            }
-            return res.status(204).send({mensaje: 'No hay información que buscar'});
-        })
+    .then(ejercicios=>{
+        if(ejercicios.length){
+            return res.status(200).send({ejercicios})
+        }
+        return res.status(204).send({mensaje: 'No hay información que mostrar'})
+    })
+    .catch(e=>{return res.status(404).send({mensaje: `Error al buscar la informacion ${e}`})})
 
-        .catch(error => {
-            res.status(404).send({
-                mensaje: `Error al buscar la información ${e}`
+}
+
+function guardarEjercicio(req, res) {
+    console.log(req.body);
+    new ejercicioModel(req.body).save()
+    .then(info =>{
+        return res.status(200).send({mensaje: 'Incormacion guardad con exito', info})
+    })
+    .catch(e => {return res.status(404).send({mensaje: "Error al guardar la informacion",e})})
+}
+
+function buscarEjercicio(req, res, next){
+    let consulta ={}
+    consulta[req.params.key] = req.params.value
+    ejercicioModel.find(consulta)
+    .then(info =>{
+        if(!info.length) return next()
+        req.body.ejercicios = info
+        return next()
+    })
+    .catch(e => {
+        req.body.e = e
+        next()
+    })
+}
+
+function mostrarEjercicio(req, res){
+    if(req.body.e) return res.status(404).send
+    ({mensaje: "Error al buscar la informacion", 
+    error: req.body.e})
+    if(!req.body.ejercicios) return res.status(204).send
+    ({mensaje: "No hay informacion que mostrar"})
+    let ejercicios = req.body.ejercicios
+    return res.status(200).send(ejercicios)
+}
+
+function eliminarEjercicio(req, res){
+    if(req.body.e) {
+        return res.status(404).send({
+            mensaje: "Error al buscar la informacion", 
+            error: req.body.e
+        });
+    }
+
+    if(!req.body.ejercicios || !req.body.ejercicios.length) {
+        return res.status(204).send({
+            mensaje: "No hay informacion que mostrar"
+        });
+    }
+
+    req.body.ejercicios[0].deleteOne()
+    .then(info => {
+        return res.status(200).send({
+            mensaje: "Informacion eliminada con exito", 
+            info
+        });
+    })
+    .catch(e => {
+        return res.status(404).send({
+            mensaje: "Error al eliminar la informacion", 
+            e
+        });       
+    });
+}
+
+function actualizarEjercicio(req, res) {
+    if (req.body.e) {
+        return res.status(500).send({
+            mensaje: "Error al buscar la información",
+            error: req.body.e
+        });
+    }
+
+    if (!req.body.ejercicios || !req.body.ejercicios.length) {
+        return res.status(204).send({
+            mensaje: "No hay información para actualizar"
+        });
+    }
+
+    const ejercicio = req.body.ejercicios[0];
+    
+    // Actualiza los campos del ejercicio con lo que venga en el body
+    Object.assign(ejercicio, req.body);
+
+    ejercicio.save()
+        .then(info => {
+            return res.status(200).send({
+                mensaje: "Información actualizada con éxito",
+                info
+            });
+        })
+        .catch(e => {
+            return res.status(500).send({
+                mensaje: "Error al actualizar la información",
+                error: e
             });
         });
 }
 
+
 module.exports = {
-    buscarTodo
+    buscarTodo,
+    guardarEjercicio,
+    buscarEjercicio,
+    mostrarEjercicio,
+    eliminarEjercicio,
+    actualizarEjercicio
 }

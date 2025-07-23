@@ -12,6 +12,8 @@ module.exports =  {
     
         })
         .catch(e =>{console.log('Error al conectar a la base de datos', e);})
+        
 }
 
 }
+
